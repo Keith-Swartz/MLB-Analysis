@@ -1,0 +1,67 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+# WAR Blog Assignment
+## Keith Swartz
+
+```{r include=FALSE}
+library(tidyverse)
+library(esquisse)
+library(tidymodels)
+library(lmtest)
+Pitchers_2019 <- read_csv("FanGraphs Leaderboard.csv")
+```
+
+The most difficult job MLB general managers and front office personnel are tasked with is talent evaluation. This is a very difficult process because there is no uniform way of evaluating players. Some believe by just watching a player, they can determine their strengths and weaknesses and compare them to others but others believe in using analytic metrics that evaluate and quantify their abilities. In my opinion, both methods are flawed when used exclusively, but when used supplementary of each other, they accurately depict a player's true worth.
+
+One of the metrics that is most commonly used to evaluate players is Wins Above Replacement, or for short, WAR. WAR determines position player's value by adding up their batting runs, base running runs, fielding runs, positional adjustments, league adjustments and replacement runs and divides them by runs per win. But, in this post I want to focus on predicting WAR for starting pitchers. First, we must understand how WAR is derived in order to evaluate potential predictive statistics. The formula, in it's simplest form, is the total amount of runs allowed divided by innings pitched. But, in order to compare a particular player's performance, we must determine how an average pitcher would have performed under the same circumstances. The factors that WAR takes into consideration are level of opposition, interleague play, adjusting for team defense, adjusting averages for starters and relievers, and custom park factors. Now that we understand the structure of the formula, I will now build a model that will predict a pitchers WAR from a dataset containing 61 starting pitchers' statistics in the 2019 season.
+
+Before building a predictive model, I first need to choose which variables I want to include. I plotted all relevant variables against WAR, to look for linearity between the two variables and found that only Innings Pitched and Fielding Independent Pitching (FIP) were the only two significant predictors. I was very surprised that K/9, BB/9, and ERA were not valid predictors as those would be factors you would think would relate to WAR. 
+
+```{r include=FALSE}
+summary(Pitchers_2019)
+```
+
+
+Inning Pitched & FIP Plotted with WAR
+```{r}
+ggplot(Pitchers_2019,aes(x=WAR, y=IP))+
+  geom_point()+
+  geom_smooth()+
+  theme_bw()+
+  labs(title = "Relationship Between Innings Pitched and WAR ", x= "WAR", y= "Innings Pitched")
+
+
+ggplot(Pitchers_2019,aes(x=WAR, y=FIP))+
+  geom_point()+
+  geom_smooth()+
+  theme_bw()+
+  labs(title = "Relationship Between FIP and WAR ", x= "WAR", y= "FIP")
+```
+
+
+Next I developed my model using both Innings Pitched and FIP to predict WAR. This model performed remarkably well and determined that 94% of the observed variation can be determined by Innings Pitched and FIP. Lastly, I want to test out the model by plugging a few random inputs for Innings Pitched and FIP and see what WAR this hypothetical pitcher would have. For this example, I took the mean of both FIP (3.993) and Innings Pitched (185.1) and ran it through my formula. This gave me a WAR of 3.47, which is almost identical to the WAR mean of 3.49.  
+
+
+```{r include=FALSE}
+pitcher_recipe = recipe(WAR ~ IP+FIP , Pitchers_2019)
+
+lm_model = #give the model type a name 
+  linear_reg() %>% #specify that we are doing linear regression
+  set_engine("lm") #specify the specify type of linear tool we want to use 
+
+lm_wflow = 
+  workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(pitcher_recipe)
+
+lm_fit = fit(lm_wflow, Pitchers_2019)
+
+summary(lm_fit$fit$fit$fit)
+```
+
+
+
+
