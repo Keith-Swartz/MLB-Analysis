@@ -1,0 +1,112 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+# MOD 2 Assignment 1 - Runs Created
+## Keith Swartz
+
+```{r include=FALSE}
+library(tidyverse)
+library(esquisse)
+library(Lahman)
+library(tidymodels)
+```
+
+Task 1
+
+```{r}
+teams = Lahman::Teams
+
+teams1= filter(teams,yearID>=1998)
+```
+
+Each of the 690 rows corresponds to one of the 30 MLB team's season starting in 1998 and going to 2020.
+
+Task 2
+
+```{r}
+mean(teams1$R)
+
+summary(teams1)
+```
+Mean Runs = 725.7
+
+Most Runs = 1999 Cleveland Indians with 1009
+
+Least Runs = 2020 Pittsburgh Pirates with 219
+
+
+Task 3
+
+```{r}
+ggplot(teams1,aes(x=yearID,y=R))+
+  geom_point()+
+  geom_smooth()
+```
+
+After reviewing the plot above, the amount of runs scored per season has been fluctuating up and down, in roughly 5-year spans, from 1998 to 2019. This is to be expected due to the rule changes, enforcement of rules, and modifications to the equipment used. The 2020 season was plagued by Covid-19, causing the league to play a 60 game season which is why the 2020 season exhibits significantly less runs than  the rest of the years shown in the visual above.
+
+Task 4
+```{r}
+teams1 = teams1 %>% mutate(X1B = H - X2B - X3B - HR,
+TB = X1B + 2*X2B + 3*X3B + 4*HR)
+
+teams1 = teams1 %>% mutate(RC = ((H+BB)*TB)/(AB+BB))
+```
+
+```{r}
+ggplot(teams1,aes(x=RC,y=R))+
+  geom_point()
+```
+
+When plotting runs created versus runs scored, you can see that they have a linear relationship.
+
+Task 5
+```{r}
+summary(teams1)
+
+
+```
+
+The 2003 Boston Red Sox's (different team than in task 2) had the most runs created with 1013.7 and the 2020 Pittsburgh Pirates (same team in task 2) had the least amount of runs created with 194.6.
+
+
+Task 6
+
+```{r}
+lm(R~RC,teams1)
+```
+
+y=.955(RC)+28.265
+
+```{r}
+RCrecipe= recipe(R ~ RC, teams1)
+
+lm_model<- 
+  linear_reg() %>%
+  set_engine("lm")
+
+
+lm_wflow=
+  workflow() %>%
+  add_model(lm_model) %>%
+  add_recipe(RCrecipe)
+
+lm_fit = fit(lm_wflow, teams1)
+
+summary(lm_fit$fit$fit$fit)
+```
+
+Runs created is a significant predictor of runs with a p-value well below .05 and the model is extremely accurate with an adjusted r-square of .96.
+
+
+Task 7
+
+```{r}
+teams1= teams1 %>% mutate(Diff=RC-R)
+summary(teams1)
+```
+
+The Diff column describes how well a team scored compared to the estimated amount of runs derived from their total bases (including walks) divided by the amount of times a batter for their team went to the plate. If a team has a positive Diff value, that team did not do a good job of capitalizing on opportunities when runners were on base and that would be shown in the amount of runners left on base and batting average with runners in scoring position. If a team has a negative Diff total, that means that they outperformed their total base output. This would be evident in teams that are great at "small-ball", which consists of running the bases, bunting, and sacrifice fly balls. The team with the best Diff value since 1998 were the 2010 Tampa Bay Rays with a total of -79.225 and the team with the worst Diff value were the 2005 Chicago Cubs with a total of 84.894.
+
