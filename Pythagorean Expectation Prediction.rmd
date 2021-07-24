@@ -1,0 +1,113 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+# Mod 2 Assignment 2 - Pythagorean Expectation Prediction Assignment
+## Keith Swartz
+
+
+```{r include=FALSE}
+library(tidyverse)
+library(esquisse)
+library(Lahman)
+library(tidymodels)
+```
+
+Task 1
+```{r}
+teams = Lahman::Teams
+
+teams1= filter(teams,yearID>=1995)
+```
+
+There are 48 columns and 774 obseravtions.
+
+Task 2
+
+```{r}
+baseball = teams1%>% mutate(Wpct = W/(W+L))%>% mutate(ExpWpct = (R^2)/(R^2+RA^2))
+
+ggplot(baseball,aes(x=Wpct,y=ExpWpct))+
+  geom_point()+
+  geom_smooth()
+```
+
+The relationship between expected win percentage and the actual win percentage is linear which makes me believe that expected win percentage will be a good predictor of actual win percentage.
+
+Task 3
+
+```{r}
+baseball = baseball %>% mutate(error=Wpct-ExpWpct) %>% mutate(sqerror=error*error)
+summary(baseball)
+```
+
+The 2014 Oakland Athletics have the most negative error score of -0.076 and the 2020 Miami Marlins have the most positive error with 0.089 followed closely by the 2017 San Diego Padres. The 2012 New York Mets had the error that was closets to 0 with a score of .00012. The pythagorean expectations percentage predicts winning percentage based off the total amount of runs a team scores and divides it by the total amount of runs scored in games a team plays in. This formula is a great way to quickly look at runs scored and runs allowed and determine which teams are good and which teams are bad. The problem with the equation is that it does not properly weight blowout wins and losses. If a team has a high positive rating it means they won a lot of close games and lost a lot of blowouts and if a team has a high negative rating they won a lot of games by a large margin. An error close to zero means that the pythagorean expectation percentage did a good job of predicting wins and losses for this team's season.
+
+Task 4
+
+```{r}
+summarize(baseball,mean(sqerror))
+```
+SqError Mean = 0.00066
+
+```{r}
+baseball = baseball %>% mutate(ExpWpctOpt1 = (R^1.9)/(R^1.9+RA^1.9)) %>% mutate(error1=Wpct-ExpWpctOpt1) %>% mutate(sqerror1=error1^2)
+
+summarize(baseball,mean(sqerror1))
+```
+
+```{r}
+baseball = baseball %>% mutate(ExpWpctOpt2 = (R^1.8)/(R^1.8+RA^1.8)) %>% mutate(error2=Wpct-ExpWpctOpt2) %>% mutate(sqerror2=error2^2)
+
+summarize(baseball,mean(sqerror2))
+```
+
+```{r}
+baseball = baseball %>% mutate(ExpWpctOpt3 = (R^1.7)/(R^1.7+RA^1.7)) %>% mutate(error3=Wpct-ExpWpctOpt3) %>% mutate(sqerror3=error3^2)
+
+summarize(baseball,mean(sqerror3))
+```
+
+```{r}
+baseball = baseball %>% mutate(ExpWpctOpt4 = (R^1.6)/(R^1.6+RA^1.6)) %>% mutate(error4=Wpct-ExpWpctOpt4) %>% mutate(sqerror4=error4^2)
+
+summarize(baseball,mean(sqerror4))
+```
+*
+```{r}
+baseball = baseball %>% mutate(ExpWpctOpt5 = (R^1.85)/(R^1.85+RA^1.85)) %>% mutate(error5=Wpct-ExpWpctOpt5) %>% mutate(sqerror5=error5^2)
+
+summarize(baseball,mean(sqerror5))
+```
+
+```{r}
+baseball = baseball %>% mutate(ExpWpctOpt6 = (R^2.1)/(R^2.1+RA^12.1)) %>% mutate(error6=Wpct-ExpWpctOpt6) %>% mutate(sqerror6=error6^2)
+
+summarize(baseball,mean(sqerror6))
+```
+
+```{r}
+baseball = baseball %>% mutate(ExpWpctOpt7 = (R^1.86)/(R^1.86+RA^1.86)) %>% mutate(error7=Wpct-ExpWpctOpt7) %>% mutate(sqerror7=error7^2)
+
+summarize(baseball,mean(sqerror7))
+```
+
+```{r}
+baseball = baseball %>% mutate(ExpWpctOpt8 = (R^1.84)/(R^1.84+RA^1.84)) %>% mutate(error8=Wpct-ExpWpctOpt8) %>% mutate(sqerror8=error8^2)
+
+summarize(baseball,mean(sqerror8))
+```
+*
+```{r}
+baseball = baseball %>% mutate(ExpWpctOpt9 = (R^1.855)/(R^1.855+RA^1.855)) %>% mutate(error9=Wpct-ExpWpctOpt9) %>% mutate(sqerror9=error9^2)
+
+summarize(baseball,mean(sqerror9))
+```
+```{r}
+baseball = baseball %>% mutate(ExpWpctOpt10 = (R^1.8555)/(R^1.8555+RA^1.8555)) %>% mutate(error10=Wpct-ExpWpctOpt10) %>% mutate(sqerror10=error10^2)
+
+summarize(baseball,mean(sqerror10))
+```
+
+The best/smallest MSEopt value was 0.0006340326 using an exponent of 1.855.
